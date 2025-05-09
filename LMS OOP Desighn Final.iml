@@ -1,11 +1,263 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
-    <exclude-output />
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-    </content>
-    <orderEntry type="inheritedJdk" />
-    <orderEntry type="sourceFolder" forTests="false" />
-  </component>
-</module>
+import java.util.*;
+
+/**
+ * The Book class represents a book in the library system.
+ * It encapsulates the book's title and availability status.
+ * This class demonstrates the principle of Encapsulation.
+ */
+class Book {
+    private final String bookName;
+    private boolean isAvailableForLoan;
+
+    /**
+     * Constructs a Book object with a specified title and author.
+     * Initially, the book is available for loan.
+     */
+    public Book(String bookName, String bookAuthorName) {
+        this.bookName = bookName;
+        this.isAvailableForLoan = true;
+    }
+
+    /**
+     * Attempts to borrow the book. If the book is available,
+     * it is marked as unavailable and the method returns true.
+     * Otherwise, an error message is printed and false is returned.
+     */
+    public boolean borrowBook() {
+        if (isAvailableForLoan) {
+            isAvailableForLoan = false;
+            System.out.println("Book borrowed: " + bookName);
+            return true;
+        }
+        System.out.println("Sorry, the book is currently unavailable.");
+        return false;
+    }
+
+    /**
+     * Returns the book by marking it as available again.
+     */
+    public void returnBook() {
+        isAvailableForLoan = true;
+        System.out.println("Book returned: " + bookName);
+    }
+
+    /**
+     * Returns the availability status of the book.
+     */
+    public boolean isAvailableForLoan() {
+        return isAvailableForLoan;
+    }
+
+    /**
+     * Returns the title of the book.
+     */
+    public String getTitle() {
+        return bookName;
+    }
+}
+
+/**
+ * The abstract class User serves as a blueprint for all library users.
+ * It defines shared properties and behaviours such as borrowing and returning books.
+ * This class supports Abstraction and is extended by specific user types.
+ */
+abstract class User {
+    private final String userName;
+    protected List<Book> currentlyBorrowedBooks;
+
+    /**
+     * Constructs a User with a given name.
+     */
+    public User(String userName) {
+        this.userName = userName;
+        this.currentlyBorrowedBooks = new ArrayList<>();
+    }
+
+    /**
+     * Allows the user to return a previously borrowed book.
+     * If the book is not found in the user’s borrowed list, a warning is displayed.
+     */
+    public void returnBook(Book book) {
+        if (currentlyBorrowedBooks.contains(book)) {
+            book.returnBook();
+            currentlyBorrowedBooks.remove(book);
+        } else {
+            System.out.println("This book wasn't borrowed by " + userName);
+        }
+    }
+
+    /**
+     * Lists all books currently borrowed by the user.
+     */
+    public void listBorrowedBooks() {
+        if (currentlyBorrowedBooks.isEmpty()) {
+            System.out.println(userName + " has not borrowed any books.");
+        } else {
+            System.out.println(userName + "'s borrowed books:");
+            for (Book book : currentlyBorrowedBooks) {
+                System.out.println(book.getTitle());
+            }
+        }
+    }
+
+    /**
+     * Checks if the user has borrowed a specific book.
+     */
+    public boolean hasBorrowed(Book book) {
+        return currentlyBorrowedBooks.contains(book);
+    }
+
+    /**
+     * Abstract method to borrow a book.
+     * Subclasses must provide a specific implementation based on user type.
+     * This method demonstrates Polymorphism through method overriding.
+     */
+    public abstract boolean borrowBook(Book book);
+}
+
+/**
+ * The Student class represents a student user in the library system.
+ * It inherits from the User class and enforces a borrowing limit.
+ * Demonstrates Inheritance and Polymorphism.
+ */
+class Student extends User {
+    private final int maxBooks = 5;
+
+    /**
+     * Constructs a Student with the given name.
+     */
+    public Student(String userName) {
+        super(userName);
+    }
+
+    /**
+     * Allows the student to borrow a book if the maximum limit is not exceeded
+     * and the book is available. Returns true if the borrowing is successful.
+     */
+    @Override
+    public boolean borrowBook(Book book) {
+        if (currentlyBorrowedBooks.size() < maxBooks && book.isAvailableForLoan()) {
+            currentlyBorrowedBooks.add(book);
+            return book.borrowBook();
+        }
+        System.out.println("Student cannot borrow more than " + maxBooks + " books.");
+        return false;
+    }
+}
+
+/**
+ * The Faculty class represents a faculty user in the library system.
+ * It inherits from the User class and has no borrowing limit.
+ * Demonstrates Inheritance and Polymorphism.
+ */
+class Faculty extends User {
+
+    /**
+     * Constructs a Faculty member with the given name.
+     */
+    public Faculty(String userName) {
+        super(userName);
+    }
+
+    /**
+     * Allows the faculty member to borrow a book without any borrowing limit.
+     * Returns true if the borrowing is successful.
+     */
+    @Override
+    public boolean borrowBook(Book book) {
+        if (book.isAvailableForLoan()) {
+            currentlyBorrowedBooks.add(book);
+            return book.borrowBook();
+        }
+        return false;
+    }
+}
+
+/**
+ * The Inventory class is responsible for managing the collection of books
+ * in the library. It supports adding and searching for books.
+ * Demonstrates Encapsulation.
+ */
+class Inventory {
+    private final List<Book> booksList;
+
+    /**
+     * Constructs an empty Inventory.
+     */
+    public Inventory() {
+        booksList = new ArrayList<>();
+    }
+
+    /**
+     * Adds a new book to the inventory.
+     */
+    public void addBook(Book book) {
+        booksList.add(book);
+    }
+
+    /**
+     * Searches for a book by title (case-insensitive).
+     * Returns the book if found, or null if not found.
+     */
+    public Book findBookByTitle(String bookName) {
+        for (Book book : booksList) {
+            if (book.getTitle().equalsIgnoreCase(bookName)) {
+                return book;
+            }
+        }
+        System.out.println("Book not found: " + bookName);
+        return null;
+    }
+}
+
+/**
+ * The Main class contains the program's entry point.
+ * It demonstrates the functionality of the Library Management System
+ * by simulating book borrowing and returning operations.
+ */
+public class Main {
+    public static void main(String[] args) {
+        // Create an inventory and add books to the library
+        Inventory inventory = new Inventory();
+        Book book1 = new Book("1984", "George Orwell");
+        Book book2 = new Book("To Kill a Mockingbird", "Harper Lee");
+        Book book3 = new Book("Don Quixote", "Miguel de Cervantes");
+
+        inventory.addBook(book1);
+        inventory.addBook(book2);
+        inventory.addBook(book3);
+
+        // Create user instances
+        Student student1 = new Student("Neo");
+        Faculty faculty1 = new Faculty("Mr. Smith");
+
+        // Demonstrate borrowing functionality for a student
+        System.out.println("Student borrowing books:");
+        student1.borrowBook(inventory.findBookByTitle("1984"));
+        student1.borrowBook(inventory.findBookByTitle("Don Quixote"));
+        student1.borrowBook(inventory.findBookByTitle("To Kill a Mockingbird"));  // May fail due to limit
+
+        // Demonstrate borrowing functionality for a faculty member
+        System.out.println("\nFaculty borrowing books:");
+        faculty1.borrowBook(inventory.findBookByTitle("To Kill a Mockingbird"));  // May be unavailable
+        faculty1.borrowBook(inventory.findBookByTitle("1984"));                   // May be unavailable
+
+        // Display borrowed books
+        System.out.println("\nNeo's borrowed books:");
+        student1.listBorrowedBooks();
+
+        System.out.println("\nMr. Smith's borrowed books:");
+        faculty1.listBorrowedBooks();
+
+        // Simulate returning books
+        student1.returnBook(book1);  // Student returns "1984"
+        faculty1.returnBook(book2);  // Faculty returns "To Kill a Mockingbird"
+
+        // Display borrowed books after returning
+        System.out.println("\nNeo's borrowed books after returning:");
+        student1.listBorrowedBooks();
+
+        System.out.println("\nMr. Smith's borrowed books after returning:");
+        faculty1.listBorrowedBooks();
+    }
+}
